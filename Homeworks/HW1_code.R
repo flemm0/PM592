@@ -37,3 +37,5 @@ wcgs_raw <- readr::read_csv("./data/wcgs.csv")
 
 # 2a
 str(wcgs_raw)
+
+names(wcgs_raw)
