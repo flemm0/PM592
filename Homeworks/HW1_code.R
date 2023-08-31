@@ -88,6 +88,39 @@ wcgs %>%
 wcgs %>%
   ggplot(aes(x=bmi, y=sbp)) +
   geom_point() +
-  geom_smooth(method = "lm", alpha=.01) +
   labs(x="Body Mass Index", y="Systolic Blood Pressure") +
   theme_minimal()
+
+# 2h
+sum(wcgs$ncigs)
+
+# 2i
+wcgs %>%
+  count(dibpat, smoke) %>%
+  group_by(dibpat) %>%
+  mutate(dibpat_count = sum(n)) %>%
+  mutate(dibpat_smoke_pct = n / dibpat_count)
+
+
+## Question 3
+
+# 3a
+# since population std deviation is not given, calculate t-statistic
+q = (mean(wcgs$sbp) - 125) / (sd(wcgs$sbp) / sqrt(length(wcgs$sbp)))
+2*pt(q=q, df=length(wcgs$sbp)-1, lower.tail=F)
+
+# 3b
+wcgs %>%
+  ggplot(aes(x=smoke, y=sbp, fill=smoke)) + 
+  geom_boxplot() +
+  theme_minimal()
+
+
+# wcgs %>%
+#   ggplot(aes(x=sbp)) +
+#   geom_histogram()
+# 
+# wcgs %>%
+#   ggplot(aes(sample=sbp)) +
+#   geom_qq() +
+#   geom_qq_line(color='blue')
