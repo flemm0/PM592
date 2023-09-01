@@ -115,12 +115,52 @@ wcgs %>%
   geom_boxplot() +
   theme_minimal()
 
+# 3c 
+# parametric statistical test: t-test
+var.test(sbp ~ as.factor(smoke), data=wcgs) # p < 0.05 reject null
+t.test(sbp ~ as.factor(smoke), var.equal=F, data=wcgs)
 
-# wcgs %>%
-#   ggplot(aes(x=sbp)) +
-#   geom_histogram()
-# 
-# wcgs %>%
-#   ggplot(aes(sample=sbp)) +
-#   geom_qq() +
-#   geom_qq_line(color='blue')
+
+# 3d
+wilcox.test(sbp ~ as.factor(smoke), data=wcgs)
+
+
+# 3e
+describeBy(wcgs$sbp, group=wcgs$smoke, mat=T)
+
+# CI of mean for t-distribution: mean +/- t * se
+# t = critical t-value based on desired confidence level
+# standard error: sample stdev / df
+
+calculate_ci <- function(x, lower=TRUE) {
+  t_crit = qt(1 - 0.05/2, df=length(x)-1) # use `pt()` function to get critical t-value for 95% CI
+  se = sd(x) / (length(x) - 1)
+  if (lower) {
+    return(mean(x) - t_crit*se)
+  } else {
+    return(mean(x) + t_crit*se)
+  }
+}
+
+bind_rows(
+  wcgs %>%
+    group_by(smoke) %>%
+    summarise(
+      Mean=mean(sbp),
+      SD=sd(sbp),
+      ci_lower=calculate_ci(sbp, lower=TRUE),
+      ci_higher=calculate_ci(sbp, lower=FALSE)
+    ) %>% 
+    as.data.frame(),
+  wcgs %>%
+    summarise(
+      smoke="combined",
+      Mean=mean(sbp),
+      SD=sd(sbp),
+      ci_lower=calculate_ci(sbp, lower=TRUE),
+      ci_higher=calculate_ci(sbp, lower=FALSE)
+    )
+  
+)
+
+
