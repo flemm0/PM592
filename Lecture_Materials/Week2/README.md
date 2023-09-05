@@ -105,12 +105,8 @@ How do we know if a variable is normally distributed?
 
 | Distribution | description |
 | --- | --- |
-| T-distribution | sampling distribution of mean when population standard deviation is unknown 
-analog of Z distribution when don’t know the population standard deviation
- regression parameters |
-| Chi-square | sum of squared normal distributions
-test statistic for contingency tables
-test statistic for maximum likelihood estimates |
+| T-distribution | sampling distribution of mean when population standard deviation is unknown; analog of Z distribution when don’t know the population standard deviation; regression parameters |
+| Chi-square | sum of squared normal distributions; test statistic for contingency tables; test statistic for maximum likelihood estimates |
 | F-distribution | ratio of chi-square variables |
 | Bernoulli | proportion of successful trials |
 
