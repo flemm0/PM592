@@ -48,11 +48,11 @@ To find probabilities that a score X falls in a certain range
     - What can be said:
         - about 20% of OkCupid users have height < 65”
         - probability that any OkCupid user has height < 65” is about 20%
-- `pnorm` function gives area to ************left************, so if you want area to the ***************right******* then take 1 - `pnorm`
+- `pnorm` function gives area to left, so if you want area to the right then take 1 - `pnorm`
     - in R, you can set `lower.tail=F` in `pnorm`
 
 - Going the other direction, you can get the z-value corresponding to a given percentile
-    - $P(X<Z) = 0.80$ (what is z-value corresponding to 80th percentile?)
+    - P(X<Z) = 0.80 (what is z-value corresponding to 80th percentile?)
     - given by `qnorm` function in R
 - If someone scored in the 99th percentile on a test their z-score = `qnorm(.99)` = 2.32
 
