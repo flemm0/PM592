@@ -164,3 +164,64 @@ bind_rows(
 )
 
 
+## Question 4
+
+# 4a
+
+pop1 <- rnorm(n=30, mean=100, sd=20)
+pop2 <- rnorm(n=30, mean=105, sd=20)
+
+t.test(pop1, pop2, var.equal=T)
+
+mean(pop1)
+sd(pop1)
+
+mean(pop2)
+sd(pop2)
+
+
+# 4b
+
+print_stats <- function(pop1, pop2, var.equal=T){
+  print(paste("Mean pop1:", mean(pop1)), sep=" ")
+  print(paste("SD pop1:", sd(pop1)), sep=" ")
+  print(paste("Mean pop2:", mean(pop2)), sep=" ")
+  print(paste("SD pop2:", sd(pop2)), sep=" ")
+  
+  t.test(pop1, pop2, var.equal=var.equal)
+}
+
+# change n to 300
+pop1 <- rnorm(n=300, mean=100, sd=20)
+pop2 <- rnorm(n=300, mean=105, sd=20)
+print_stats(pop1, pop2)
+
+# change n to 100
+pop1 <- rnorm(n=100, mean=100, sd=20)
+pop2 <- rnorm(n=100, mean=105, sd=20)
+print_stats(pop1, pop2)
+
+# change sd to 50
+pop1 <- rnorm(n=30, mean=100, sd=50)
+pop2 <- rnorm(n=30, mean=105, sd=50)
+print_stats(pop1, pop2)
+
+# change sd to 5
+pop1 <- rnorm(n=30, mean=100, sd=5)
+pop2 <- rnorm(n=30, mean=105, sd=5)
+print_stats(pop1, pop2)
+
+# change mean to 90 and 110
+pop1 <- rnorm(n=30, mean=90, sd=20)
+pop2 <- rnorm(n=30, mean=110, sd=20)
+print_stats(pop1, pop2)
+
+# change mean to 95 and 105
+pop1 <- rnorm(n=30, mean=95, sd=20)
+pop2 <- rnorm(n=30, mean=105, sd=20)
+print_stats(pop1, pop2)
+
+# set means to 100 and sds to 75
+pop1 <- rnorm(n=30, mean=100, sd=75)
+pop2 <- rnorm(n=30, mean=100, sd=75)
+print_stats(pop1, pop2)
