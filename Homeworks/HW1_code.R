@@ -101,6 +101,9 @@ wcgs %>%
   mutate(dibpat_count = sum(n)) %>%
   mutate(dibpat_smoke_pct = n / dibpat_count)
 
+# save as R data set
+write_rds(wcgs, file='./wcgs.rds')
+
 
 ## Question 3
 
