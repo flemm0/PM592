@@ -112,6 +112,8 @@ write_rds(wcgs, file='./wcgs.rds')
 q = (mean(wcgs$sbp) - 125) / (sd(wcgs$sbp) / sqrt(length(wcgs$sbp)))
 2*pt(q=q, df=length(wcgs$sbp)-1, lower.tail=F)
 
+t.test(x=wcgs$sbp, mu=125, alternative="t")
+
 # 3b
 wcgs %>%
   ggplot(aes(x=smoke, y=sbp, fill=smoke)) + 
@@ -170,6 +172,7 @@ bind_rows(
 ## Question 4
 
 # 4a
+set.seed(124)
 
 pop1 <- rnorm(n=30, mean=100, sd=20)
 pop2 <- rnorm(n=30, mean=105, sd=20)
