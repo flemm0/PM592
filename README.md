@@ -8,9 +8,7 @@ Holds all the course materials from USC PM592 taken in Fall 2023
 
 |  | Topics | HW Due | Quiz Due |
 | --- | --- | --- | --- |
-| Class 1 
-8/21 | Course Introduction. Variable types, sampling principles, summarizing data, visualizing data
-Lab: RStudio, Tidyverse, variable types, data import |  |  |
+| Class 1 (8/21) | Course Introduction. Variable types, sampling principles, summarizing data, visualizing data; Lab: RStudio, Tidyverse, variable types, data import |  |  |
 | Class 2
 8/28 | Probability & Hypothesis Testing. Distributions of random variable, the sampling distribution, central limit theorem.
 Lab: R projects, merging, setting, Z & t tests, labels, factors |  | Q2 |
