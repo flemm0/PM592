@@ -8,14 +8,10 @@ Holds all the course materials from USC PM592 taken in Fall 2023
 
 |  | Topics | HW Due | Quiz Due |
 | --- | --- | --- | --- |
-| Class 1 (8/21) | Course Introduction. Variable types, sampling principles, summarizing data, visualizing data; Lab: RStudio, Tidyverse, variable types, data import |  |  |
-| Class 2
-8/28 | Probability & Hypothesis Testing. Distributions of random variable, the sampling distribution, central limit theorem.
-Lab: R projects, merging, setting, Z & t tests, labels, factors |  | Q2 |
+| Class 1 (8/21) | Course Introduction. Variable types, sampling principles, summarizing data, visualizing data<br />Lab: RStudio, Tidyverse, variable types, data import |  |  |
+| Class 2 (8/28) | Probability & Hypothesis Testing. Distributions of random variable, the sampling distribution, central limit theorem.<br />Lab: R projects, merging, setting, Z & t tests, labels, factors |  | Q2 |
 | 9/4 | Labor Day |  |  |
-| Class 3
-9/11 | Linear Regression I. Correlation, simple linear regression, variation in Y, the least-squares line, model coefficients, residuals, R-squared, model assumptions
-Lab: Variable manipulation (cut, quantile), functions, ggplot2 | HW1 | Q3 |
+| Class 3 (9/11) | Linear Regression I. Correlation, simple linear regression, variation in Y, the least-squares line, model coefficients, residuals, R-squared, model assumptions<br />Lab: Variable manipulation (cut, quantile), functions, ggplot2 | HW1 | Q3 |
 | Class 4
 9/18 | Linear Regression II. Model assumptions, ANOVA, log transformations, categorical IVs, dummy coding
 Lab: diagnostics (ggfortify), introduction to Stringr | HW2 | Q4 |
