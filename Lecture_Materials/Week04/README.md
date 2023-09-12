@@ -77,7 +77,7 @@
         - $SS_{Error} = \sum_{i=1}^{N}(Y_i-\hat{Y})^2$
             - $Y_i$ = observed, $\bar{Y}$= mean, $\hat{Y}$= predicted
     
-    ![Untitled](README_files/Untitled%201.png)
+    ![Untitled](README_files/scatter.png)
     
 
 - Recall, $R^2$ is “the proportion of variation in Y that is explained by our X variables”
@@ -167,7 +167,7 @@
 
 - However, to test the *******overall******* effect of race (i.e. overall, is race associated with FEV):
 - Null Hypothesis: FEV is not associated with race:
-    - $H_0:\beta_1=0 \& \beta_2=0 \& \beta_3=0$
+    - $H_0:\beta_1=0 , \beta_2=0 , \beta_3=0$
 - Alternative Hypothesis: at least one beta ≠ 0
 - This is tested with the F-statistic output from `lm`
 
