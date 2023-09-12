@@ -77,7 +77,7 @@
         - $SS_{Error} = \sum_{i=1}^{N}(Y_i-\hat{Y})^2$
             - $Y_i$ = observed, $\bar{Y}$= mean, $\hat{Y}$= predicted
     
-    ![Untitled](README_files/scatter.png)
+![Untitled](README_files/scatter.png)
     
 
 - Recall, $R^2$ is “the proportion of variation in Y that is explained by our X variables”
