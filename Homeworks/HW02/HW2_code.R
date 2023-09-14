@@ -114,14 +114,12 @@ boxcox(lm(x ~ 1))
 ## Question 4
 
 # 4c
-
-test_groups <- function(mean1, mean2, sd1, sd2, n1, n2) {
-  set.seed(551)
-  test_result <- t.test(
-    x = rnorm(n1, mean1, sd1),
-    y = rnorm(n2, mean2, sd2)
-  )
-  return(test_result$p.value)
+my.t.test <- function(mean1, mean2, sd1, sd2, n1, n2) {
+  t <- (mean1 - mean2) / (sqrt((((sd1)**2)/n1) + ((sd2)**2)/n2))
+  return(2*pt(abs(t), df=n1+n2-2, lower.tail = F))
 }
 
-test_groups(909, 959, 217, 182, 12, 12)
+my.t.test(909, 959, 217, 182, 12, 12)
+my.t.test(27, 27.1, 1.8, 1.5, 12, 12)
+my.t.test(4.8, 5.1, 1.4, 1.8, 12, 12)
+my.t.test(7.3, 7.3, 1.2, 1, 12, 12)
