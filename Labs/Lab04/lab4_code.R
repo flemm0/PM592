@@ -10,35 +10,40 @@ library(ggfortify)
 data("anscombe")
 
 f1 <- ggplot(anscombe, aes(x=x1, y=y1)) +
-  geom_point() +
+  geom_point(size=2) +
   stat_poly_eq(formula = y ~ x,
                eq.with.lhs = "italic(hat(y))~`=`~",               
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                parse = TRUE) +
-  labs(title="f1")
+  labs(title="f1") +
+  geom_smooth(formula = y ~ x, method = "lm", alpha = 0.4)
 f2 <- ggplot(anscombe, aes(x=x2, y=y2)) +
-  geom_point() +
+  geom_point(size=2) +
   stat_poly_eq(formula = y ~ x,
                eq.with.lhs = "italic(hat(y))~`=`~",               
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                parse = TRUE) +
-  labs(title="f2")
+  labs(title="f2") +
+  geom_smooth(formula = y ~ x, method = "lm", alpha = 0.4)
 f3 <- ggplot(anscombe, aes(x=x3, y=y3)) +
-  geom_point() +
+  geom_point(size=2) +
   stat_poly_eq(formula = y ~ x,
                eq.with.lhs = "italic(hat(y))~`=`~",               
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                parse = TRUE) +
-  labs(title="f3")
+  labs(title="f3") +
+  geom_smooth(formula = y ~ x, method = "lm", alpha = 0.4)
 f4 <- ggplot(anscombe, aes(x=x4, y=y4)) +
-  geom_point() +
+  geom_point(size=2) +
   stat_poly_eq(formula = y ~ x,
                eq.with.lhs = "italic(hat(y))~`=`~",               
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                parse = TRUE) +
-  labs(title="f4")
+  labs(title="f4") +
+  geom_smooth(formula = y ~ x, method = "lm", alpha = 0.4)
 
 plot_grid(f1, f2, f3, f4)
+
 
 lm1 <- lm(y1 ~ x1, data = anscombe)
 summary(lm1)
@@ -49,7 +54,7 @@ summary(lm2)
 lm3 <- lm(y3 ~ x3, data = anscombe)
 summary(lm3)
 
-lm4 <- lm(y4 ~ x3, data = anscombe)
+lm4 <- lm(y4 ~ x4, data = anscombe)
 summary(lm4)
 
 
