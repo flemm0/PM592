@@ -130,17 +130,17 @@ $\beta_k$: the estimated difference in mean Y associated with a 1-unit change in
     - 3 statistics that quantify the amount of influence an observation has on the estimated regression slope(s) or predicted value of Y
     1. ********************************Cook’s Distance********************************
         1. measures how much all the fitted values change with the deletion of each observation
-        2. $d_i = \frac{e_i^2h_i}{(k+1)S^2(1-h_i)^2} = \frac{r_i^2h_i}{(k+1)(1-h_i)}$
-        3. observations with $d_i$ > 0.5 may be worth investigating
-        4. observations with $d_i$ > 1 are likely worth investigating
+        $d_i = \frac{e_i^2h_i}{(k+1)S^2(1-h_i)^2} = \frac{r_i^2h_i}{(k+1)(1-h_i)}$
+        2. observations with $d_i$ > 0.5 may be worth investigating
+        3. observations with $d_i$ > 1 are likely worth investigating
     2. **************DFBETAS**************
         1. measure of how much the regression coefficients change with the exclusion of the ith observation
-        2. $\Delta\beta = \frac{\hat{\beta}-\hat{\beta}_{(-i)}}{S_{(-i)}\sqrt{\Sigma X_i^2}}$
-        3. observations > $\frac{2}{\sqrt{n}}$ are influential
+        $\Delta\beta = \frac{\hat{\beta}-\hat{\beta}_{(-i)}}{S_{(-i)}\sqrt{\Sigma X_i^2}}$
+        2. observations > $\frac{2}{\sqrt{n}}$ are influential
     3. ************DFFITS************
         1. measure of how much the predicted value for the ith observation changes when the ith observation is deleted
-        2. $\Delta\hat{Y}_i = \frac{\hat{Y}_i - \hat{Y}_{i_{(-i)}}}{S_{(_i)}\sqrt{\Sigma h_i}}$
-        3. observations > $\frac{2}{\sqrt{\frac{k}{n}}}$ are influential
+        $\Delta\hat{Y}_i = \frac{\hat{Y}_i - \hat{Y}_{i_{(-i)}}}{S_{(_i)}\sqrt{\Sigma h_i}}$
+        2. observations > $\frac{2}{\sqrt{\frac{k}{n}}}$ are influential
 
 - R command for plotting Cook’s Distance:
     - `ols_plot_cooksd_bar(re.m)`

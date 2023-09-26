@@ -90,5 +90,6 @@ ols_plot_resid_lev(m.5a)
 
 
 ## Question 9
-cereals[4,] %>%
-  select(rating, )
+cereals[4,]
+predict(m.5a, cereals[4,])
+
