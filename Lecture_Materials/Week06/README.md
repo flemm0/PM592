@@ -33,12 +33,11 @@ How to know if an additional variable improves model fit
             1. $F_{(DFE_0-DFE_1,DFE_1)} = \frac{\frac{SSE_0-SSE_1}{DFE_0-DFE_1}}{\frac{SSE_1}{DFE_1}}$, where $E_0$  is the null model (modeled on `1`), and $E_1$ is the model with IV(s)
     4. So you can compare two linear models (one with the addition of another variable) by using the same test:
     
-    ```r
-    m1 <- lm(enjoy_ex1 ~ intervention, data = places)
-    m2 <- lm(enjoy_ex1 ~ intervention + racecat , data = places)
-    
-    anova(m1, m2)
-    ```
+```r
+m1 <- lm(enjoy_ex1 ~ intervention, data = places)
+m2 <- lm(enjoy_ex1 ~ intervention + racecat , data = places)    
+anova(m1, m2)
+```
     
     - the F statistic and p-value in the ANOVA results gives the improvement of fit by adding the race category variable
     - Extra SS test is useful for determining if set of variables improves the model
@@ -66,7 +65,7 @@ m3a <- lm(sbp ~ factor(dibpat) + age, data = wcgs)
 ```
 
 - using the formula: % change = $\frac{\beta_{unadjusted} - \beta{adjusted}}{\beta_{unadjusted}}$
-    - $\frac{-2.32 - (-1.89)}{-2.32} = 18.5%$%
+    - $\frac{-2.32 - (-1.89)}{-2.32} = 18.5%$
     - with the 18.5% change, it appears that age confounds the relationship between personality type of SBP
 - How to pick confounders to examine:
     - Philosophically — sometimes variables are ********a priori******** included automatically because they have been traditionally examined as confounders (e.g. age, gender, race)
@@ -82,7 +81,6 @@ m3a <- lm(sbp ~ factor(dibpat) + age, data = wcgs)
     - Confounder — is birth weight a sensible confounding variable?
 
 ```mermaid
-%%{ init : { "theme" : "default", "flowchart" : { "curve" : "linear" }}}%%
 graph LR
 X[Race]
 Y[Infant Mortality]
@@ -135,13 +133,13 @@ Conf --|? - No|--> X
     - How to perform the interaction inclusion in R:
         - create third variable by multiplying price by whether income is higher than median (high or low)
     
-    ```r
-    ic <-
-    	ic %>%
-    	mutate(price_hiincome = price * (income > median(income)))
+```r
+ic <-
+    ic %>%
+    mutate(price_hiincome = price * (income > median(income)))
     
-    lm(formula = cons ~ price + hiiincome + price_hiincome, data = ic)
-    ```
+lm(formula = cons ~ price + hiiincome + price_hiincome, data = ic)
+```
     
     - look at the p-value for the interaction term to see if it is statistically significant
     - The interaction term describes how the slope changes:
@@ -154,9 +152,9 @@ Conf --|? - No|--> X
             - $\hat{Y} = -0.22 + 1.90(1) + 2.11X_{price} - 6.91X(1)X_{price} = 1.68 + 4.80X_{price}$
     - another way to create the interaction term automatically in R:
     
-    ```r
-    lm(formula = cons ~ price * hiincome, data = ic)
-    ```
+```r
+lm(formula = cons ~ price * hiincome, data = ic)
+```
     
 - Notes on interaction terms:
     - **************************Main Effects************************** refer to the effects (variables) in model without modeling interaction (e.g. affect of price on consumption regardless of income category)
