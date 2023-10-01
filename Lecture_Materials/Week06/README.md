@@ -39,10 +39,10 @@ m2 <- lm(enjoy_ex1 ~ intervention + racecat , data = places)
 anova(m1, m2)
 ```
     
-    - the F statistic and p-value in the ANOVA results gives the improvement of fit by adding the race category variable
-    - Extra SS test is useful for determining if set of variables improves the model
-        - when only one variable added to model, the test will mirror the Wald (t) test
-        - must be used on nested models (i.e. parameters in nested model must appear in the full model)
+- the F statistic and p-value in the ANOVA results gives the improvement of fit by adding the race category variable
+- Extra SS test is useful for determining if set of variables improves the model
+    - when only one variable added to model, the test will mirror the Wald (t) test
+    - must be used on nested models (i.e. parameters in nested model must appear in the full model)
 
 # Confounding
 
@@ -141,16 +141,16 @@ ic <-
 lm(formula = cons ~ price + hiiincome + price_hiincome, data = ic)
 ```
     
-    - look at the p-value for the interaction term to see if it is statistically significant
-    - The interaction term describes how the slope changes:
-        - an interaction coefficient of -6.91 means that for every 1-unit increase in $X_{hiincoome}$, the *****slope***** associated with $X_{price}$ decreases by 6.91 units
-        - if the equation were:
-        - $\hat{Y} = -0.22 + 1.90X_{hiincome} + 2.11X_{price} - 6.91X_{hiincome}X_{price}$,
-        - then those with income below median:
-            - $\hat{Y} = -0.22 + 1.90(0) + 2.11X_{price} - 6.91X(0)X_{price} = -0.22 + 2.11X_{price}$
-        - and those with income above median:
-            - $\hat{Y} = -0.22 + 1.90(1) + 2.11X_{price} - 6.91X(1)X_{price} = 1.68 + 4.80X_{price}$
-    - another way to create the interaction term automatically in R:
+- look at the p-value for the interaction term to see if it is statistically significant
+- The interaction term describes how the slope changes:
+    - an interaction coefficient of -6.91 means that for every 1-unit increase in $X_{hiincoome}$, the *****slope***** associated with $X_{price}$ decreases by 6.91 units
+    - if the equation were:
+    - $\hat{Y} = -0.22 + 1.90X_{hiincome} + 2.11X_{price} - 6.91X_{hiincome}X_{price}$,
+    - then those with income below median:
+        - $\hat{Y} = -0.22 + 1.90(0) + 2.11X_{price} - 6.91X(0)X_{price} = -0.22 + 2.11X_{price}$
+    - and those with income above median:
+        - $\hat{Y} = -0.22 + 1.90(1) + 2.11X_{price} - 6.91X(1)X_{price} = 1.68 + 4.80X_{price}$
+- another way to create the interaction term automatically in R:
     
 ```r
 lm(formula = cons ~ price * hiincome, data = ic)
