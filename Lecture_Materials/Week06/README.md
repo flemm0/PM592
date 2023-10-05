@@ -81,19 +81,16 @@ m3a <- lm(sbp ~ factor(dibpat) + age, data = wcgs)
     - Confounder — is birth weight a sensible confounding variable?
 
 
-```mermaid
-flowchart TD;
-    X[X - Race];
-    Y[Y - Infant Mortality];
-    Conf[Z - Birth Weight];
-
-    X --> Y;
-    Conf --|Yes|--> Y;
-    Conf --|No|--> X;
-```
-
+![Birth Weight Confounding?](README_files/bw_conf.png)
 
 - No, birth weight cannot cause age
+
+- Can cholesterol sensibly be a confounder?
+
+![Cholesterol Confounding](README_files/chol_conf.png)
+
+- It isn't clear whether cholesterol causes BMI or if BMI causes cholesterol
+
     - Study Design:
         - ideally, potential for confounding variables reduced in experimental studies (individuals are randomized into treatment groups) so treatment/exposure groups are similar in terms of potential confounding variables
         - example: is age a confounding variable in the relationship between Smart Growth Community (X) and physical activity (Y)?
