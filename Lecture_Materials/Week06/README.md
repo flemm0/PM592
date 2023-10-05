@@ -80,16 +80,18 @@ m3a <- lm(sbp ~ factor(dibpat) + age, data = wcgs)
             - large model with many non-significant X-variables violates desire to  have minimal (parsimonious) model that predicts outcome well
     - Confounder — is birth weight a sensible confounding variable?
 
-```mermaid
-flowchart TD
-    X[X - Race]
-    Y[Y - Infant Mortality]
-    Conf[Z - Birth Weight]
 
-X --> Y
-Conf --|Yes|--> Y 
-Conf --|No|--> X
+```mermaid
+flowchart TD;
+    X[X - Race];
+    Y[Y - Infant Mortality];
+    Conf[Z - Birth Weight];
+
+    X --> Y;
+    Conf --|Yes|--> Y;
+    Conf --|No|--> X;
 ```
+
 
 - No, birth weight cannot cause age
     - Study Design:
