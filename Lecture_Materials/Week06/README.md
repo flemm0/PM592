@@ -81,14 +81,14 @@ m3a <- lm(sbp ~ factor(dibpat) + age, data = wcgs)
     - Confounder — is birth weight a sensible confounding variable?
 
 ```mermaid
-graph LR
-X[Race]
-Y[Infant Mortality]
-Conf[Birth Weight]
+flowchart TD
+    X[X - Race]
+    Y[Y - Infant Mortality]
+    Conf[Z - Birth Weight]
 
 X --> Y
-Conf --|? - Yes|--> Y 
-Conf --|? - No|--> X
+Conf --|Yes|--> Y 
+Conf --|No|--> X
 ```
 
 - No, birth weight cannot cause age
