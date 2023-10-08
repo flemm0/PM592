@@ -120,15 +120,11 @@ Splines: modeling approach where the regression equation between Y and x is brok
 
 Formula for introducing a spline (using example of out-of-pocket medical cost (Y) vs. length of stay (X):
 
-$$
-X_{LOS.C7} = \{^{X_{LOS}-7, if X_{LOS}>7}_{0, if X_{LOS}\le7}
-$$
+$X_{LOS.C7} = \{^{X_{LOS}-7, if X_{LOS}>7}_{0, if X_{LOS}\le7}$
 
 - for which the model then becomes:
 
-$$
-\hat{Y} = \beta_0+\beta_1X_{LOS}+\beta_2X_{LOS.C7^+}
-$$
+$\hat{Y} = \beta_0+\beta_1X_{LOS}+\beta_2X_{LOS.C7^+}$
 
 - $\beta_1X_{LOS}$  — equation for line
 - $\beta_2X_{LOS.C7^+}$, where $X_{LOS.C7^+}$ is the length of stay (centered on 7), where length of stay is > 7
@@ -177,9 +173,9 @@ Example:
 - reciprocity is undefined for those who did not name friends, so how to include these two concepts in a model?
 - consider the following coding scheme:
     - $X_{any\_friends} = \{^{1, named\ge1friends}_{0,named 0 friends}$
-        - $X_{any\_friends}$ = 1 if named 1 or more friends, else 0
+    - ($X_{any\_friends}$ = 1 if named 1 or more friends, else 0)
     - $X_{recip} = \{^{reciprocity,named\ge1friends}_{0, named 0 friends}$
-        - $X_{recip}$ = reciprocity if named 1 or more friends, else 0
+    - ($X_{recip}$ = reciprocity if named 1 or more friends, else 0)
     - the baseline category is when the individual named 0 friends
     - $\beta_{any\_friends}$ represents the effect on Y associated with naming any friends (vs. naming no friends), holding reciprocity constant (by necessity, at 0)
         - i.e., the difference in Y for a student with zero reciprocity who named any friends, compared to a student who named no friends
