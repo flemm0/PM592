@@ -111,7 +111,7 @@
 - In a log-transformed regression, a 1-unit change in X is associated with a $e^{\beta_{1}}$ multiplicative change in Y
 - So the interpretation goes from: a one-unit (year) increase in age is associated with a 0.028-unit in log Y
 - To: a one-unit increase in age is associated with a exp(0.028) = 1.0286 times increase in Y
-- Or: a one-unit increase in age is associated with a $100(e^{\beta-1})$ = 2.86% increase in Y
+- Or: a one-unit increase in age is associated with a $100(e^{\beta}-1)$ = 2.86% increase in Y
 - For the confidence interval, must exponentiate lower and upper bounds individually:
     - 95% CI = $(e^{\beta-1.96SE(\beta)}, e^{\beta+1.96SE(\beta)})$
     - `lm(log(expense) ~ age, data = re) %>% confint()`
@@ -166,11 +166,11 @@
     - etc.
 
 - However, to test the *******overall******* effect of race (i.e. overall, is race associated with FEV):
-- Null Hypothesis: FEV is not associated with race:
-    - $H_0:\beta_1=0 , \beta_2=0 , \beta_3=0$
-- Alternative Hypothesis: at least one beta ≠ 0
-- This is tested with the F-statistic output from `lm`
-
-- If you run `lm(fev ~ factor(race), data = chs ) %>% summary()`, R will automatically create the dummy variables
+	- Null Hypothesis: FEV is not associated with race:
+    		- $H_0:\beta_1=0 , \beta_2=0 , \beta_3=0$
+	- Alternative Hypothesis: at least one beta ≠ 0
+	- This is tested with the F-statistic output from `lm`
+<br><br>
+- Notes: if you run `lm(fev ~ factor(race), data = chs ) %>% summary()`, R will automatically create the dummy variables
 - Will select the first variable alphabetically to be reference, unless specified:
     - `lm(fev ~ relevl(factor(race), race = "W"), data = chs) %>% summary()`
