@@ -55,7 +55,7 @@ lm(ap.sqrt ~ I(((bw.c+1738)/1000)^3) + I(((bw.c+1738)/1000)^3*log(((bw.c+1738)/1
 # 1d
 fw <-
   fw %>%
-  mutate(bw.quint = quantcut(bw, q = 5, labels = F))
+  mutate(bw.quint = quantcut(bw, q = 5))
 lm(ap.sqrt ~ bw.quint, data = fw) %>% summary()
 lm(ap.sqrt ~ bw.quint, data = fw) %>% pred_r_squared()
 

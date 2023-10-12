@@ -65,7 +65,7 @@ $$
 
 Example conclusion statement:
 
-- Upon visual inspection we found that age was not linearly related to house selling price. We found that a quadratic model fir the data well (p < .001) and a cubic term did not improve model fit (p = 0.22). Our best-fit equation for selling price was $\hat{Y} = 53.4 - 1.93X_{AGE}+0.04X_{AGE}^2$, as selling price decreased until house age of approximately 22 years, and then subsequently began to rebound.
+- Upon visual inspection we found that age was not linearly related to house selling price. We found that a quadratic model fit the data well (p < .001) and a cubic term did not improve model fit (p = 0.22). Our best-fit equation for selling price was $\hat{Y} = 53.4 - 1.93X_{AGE}+0.04X_{AGE}^2$, as selling price decreased until house age of approximately 22 years, and then subsequently began to rebound.
 
 # Fractional Polynomials
 
