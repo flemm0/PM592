@@ -224,3 +224,6 @@ The difference between confounding and effect modification:
 
 - Confounding occurs when a factor is associated with both the exposure and the outcome but doesn't lie on the causative pathway (mediator)
     - e.g. you are looking for association between coffee and lung cancer -- this association may be distorted by smoking if smokers are unevenly distributed between the two groups. It may appear that there's a relationship between coffee and lung cancer, but if you were to consider smokers and non-smokers separately for each group, this would show no association
+
+Flowchart for interactions and confounding:
+![flowchart](README_files/flowchart.png)
