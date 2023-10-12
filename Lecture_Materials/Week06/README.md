@@ -213,3 +213,14 @@ Recommendations:
 - Check interactions first. Because interactions reflect strata-specific effects, check for interaction variables before assessing confounding.
 - Don’t get overwhelmed. Stick to ********a priori******** hypothesized interactions, or interactions that make the most sense. This reduces the number of possible variables you have to look at.
 - Stick to parsimony. A good model attempts to simplify reality while retaining accuracy.
+
+
+Notes:
+
+The difference between confounding and effect modification:
+
+- Effect modification is all about stratification -- it occurs when an exposure has a different effect among different subgroups. It is associated with the outcome, but not the exposure.
+    - e.g. you are testing out a new drug, Drug X. If Drug X works on females but not in males, this is an example of effect modification
+
+- Confounding occurs when a factor is associated with both the exposure and the outcome but doesn't lie on the causative pathway (mediator)
+    - e.g. you are looking for association between coffee and lung cancer -- this association may be distorted by smoking if smokers are unevenly distributed between the two groups. It may appear that there's a relationship between coffee and lung cancer, but if you were to consider smokers and non-smokers separately for each group, this would show no association
