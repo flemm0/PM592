@@ -38,14 +38,26 @@ beta_pct_change(.4158, .42932) # competence
 ## Question 2
 
 # 2a
-lm(satisfac ~ rpe*classtype.f + encourage + control + perc_comp, data=gx) %>% summary()
-lm(satisfac ~ rpe + encourage*classtype.f + control + perc_comp, data=gx) %>% summary()
-lm(satisfac ~ rpe + encourage + control*classtype.f + perc_comp, data=gx) %>% summary()
-lm(satisfac ~ rpe + encourage + control + perc_comp*classtype.f, data=gx) %>% summary()
+anova(
+  lm(satisfac ~ classtype.f + rpe + encourage + control + perc_comp, data=gx),
+  lm(satisfac ~ rpe*classtype.f + encourage + control + perc_comp, data=gx)
+)
+anova(
+  lm(satisfac ~ classtype.f + rpe + encourage + control + perc_comp, data=gx),
+  lm(satisfac ~ rpe + encourage*classtype.f + control + perc_comp, data=gx)
+)
+anova(
+  lm(satisfac ~ classtype.f + rpe + encourage + control + perc_comp, data=gx),
+  lm(satisfac ~ rpe + encourage + control*classtype.f + perc_comp, data=gx)
+)
+anova(
+  lm(satisfac ~ classtype.f + rpe + encourage + control + perc_comp, data=gx),
+  lm(satisfac ~ rpe + encourage + control + perc_comp*classtype.f, data=gx)
+)
 
 
 # 2b
-m <- lm(satisfac ~ classtype.f*(rpe + encourage) + control + perc_comp, data=gx) 
+m <- lm(satisfac ~ classtype.f*rpe + encourage + control + perc_comp, data=gx) 
 summary(m)
 
 # 2c
