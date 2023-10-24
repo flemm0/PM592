@@ -3,7 +3,7 @@ library(tidyverse)
 library(skimr)
 
 # outcome: fasting blood glucose levels
-# variables of interest: meals not home prepared, household food security category
+# variables of interest: meals not home prepared, household food security category, dietary sugar intake, physical activity
 # confounding variables: age, race/ethnicity, bmi, education level
 # interacting variables: receiving FS benefit, dietary sugar intake, physical activity
 
