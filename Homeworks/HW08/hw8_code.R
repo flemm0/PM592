@@ -48,6 +48,6 @@ mfp(depres ~ fp(dur), data = green, family = binomial)
 mfp(hibp ~ fp(dur), data = green, family = binomial)
 
 # 1e
-glm(depres ~ dur, data = green, family = binomial) %>%summary()
-
-glm(hibp ~ log(dur), data = green, family = binomial) %>% summary()
+glm(depres ~ dur, data = green, family = binomial) %>% summary()
+green$dur_log <- log(((green$dur+7.5)/100)) # transformation suggested by `mfp`
+glm(hibp ~ dur_log, data = green, family = binomial) %>% summary()
