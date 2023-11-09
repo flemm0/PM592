@@ -7,11 +7,14 @@ library(gmodels)
 library(MASS)
 library(glmulti)
 
+rm(list = ls())
+
 source("Labs/Lab09/plot_resid_lev_logistic.R")
 source("Labs/Lab09/logit_plot.R")
 source("Labs/Lab09/group_smooth.R")
 
 sos_dat <- readr::read_csv("data/sos_dat.csv")
+sos_dat <- na.omit(sos_dat)
 
 head(sos_dat)
 
@@ -25,11 +28,10 @@ set.seed(19)
 
 sos_dat$train <- sample(c(FALSE, TRUE), nrow(sos_dat), replace=TRUE, prob=c(0.2,0.8))
 
-
-## Question 2
-
 sos_train <- sos_dat[sos_dat$train,]
 sos_test <- sos_dat[!sos_dat$train,]
+
+## Question 2
 
 ## assessing functional form for each of the continuous variables
 
@@ -88,6 +90,9 @@ glm(skip ~ log(((tatot+1)/10)) + I(((tatot+1)/10)^0.5), family = binomial, data 
 
 glm(skip ~ male, family = binomial, data = sos_train) %>% summary() # gender is significant
 
+
+# preliminary model
+
 m1 <- glm(skip ~ bully + I(log(((bullied+2.9)/10))) + odg + age + 
             dens + I(recip^2) + grade + male + log(((tatot+1)/10)) + I(((tatot+1)/10)^0.5),
     family = binomial,
@@ -113,20 +118,25 @@ best_subset_skip_prelim <-
 summary(best_subset_skip_prelim)
 
 
-ResourceSelection::hoslem.test(m2$y, fitted(m2), g=20)
+ResourceSelection::hoslem.test(m2$y, fitted(m2), g=20) 
 plot_resid_lev_logistic(m2) # 6 influential points, but not strong outliers
 LogisticDx::dx(m2)
 DescTools::Conf(m2, pos = 1)
+# accuracy = 0.63 (0.62, 0.64)
 
+# get predicted probabilities
 m2.p <-
   tibble(
     pred_p = m2$fitted.values,
     y = m2$y
   )
 
+# get ROC measurements
 roc <- ROCit::measureit(score = m2$fitted.values, 
                    class = m2$y,
                    measure = c("ACC", "SENS", "SPEC"))
+
+# plot accuracy at different cutoff values
 tibble(
   Cutoff = roc$Cutoff,
   ACC = roc$ACC
@@ -135,6 +145,7 @@ tibble(
   geom_point() +
   geom_line() # optimal cutoff seems to be about .5
 
+# plot sensitvity and specificity tradeoff
 tibble(
   Cutoff = roc$Cutoff,
   SENS = roc$SENS,
@@ -144,6 +155,7 @@ tibble(
   ggplot(aes(x = Cutoff, y = value, color = metric)) +
   geom_point() + 
   geom_line()
+# again, optimal cutoff is about .5
 
 tibble(
   Cutoff = roc$Cutoff,
@@ -151,7 +163,7 @@ tibble(
   SPEC = roc$SPEC,
   SUM = SENS + SPEC
 ) %>%
-  arrange(-SUM, -SENS, -SPEC) # 0.494 cutoff
+  arrange(-SUM, -SENS, -SPEC) # 0.511 cutoff is the highest
 
 # ROC
 roc_empirical <- 
@@ -163,3 +175,28 @@ ciAUC(roc_empirical)
 OptimalCutpoints::optimal.cutpoints(X = "pred_p", status = "y", 
                                     data = data.frame(m2.p), 
                                     methods = c("Youden", "MaxSpSe", "MaxProdSpSe"), tag.healthy = 0)
+
+
+## Question 3
+m2_test.p <-
+  tibble(
+    pred_p = predict(m2, newdata = sos_test, type = "response"),
+    y = sos_test$skip
+  )
+
+test.roc <- 
+  ROCit::measureit(score = predict(m2, newdata = sos_test, type = "response"), 
+                   class = sos_test$skip,
+                   measure = c("ACC", "SENS", "SPEC"))
+
+# DescTools::Conf(m2_test.p$pred_p, ref=m2_test.p$y, pos = 1) # seems to take forever to run, using `caret` instead
+library(caret)
+binary_outcome <- ifelse(m2_test.p$pred_p > 0.511, 1, 0)
+confusionMatrix(as.factor(binary_outcome), as.factor(m2_test.p$y))
+
+test_roc_empirical <-
+  rocit(score = predict(m2, newdata = sos_test, type = "response"), 
+        class = sos_test$skip)
+plot(test_roc_empirical, YIndex = F)
+summary(test_roc_empirical)
+ciAUC(test_roc_empirical)
