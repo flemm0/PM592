@@ -502,11 +502,11 @@ Suppose we want to model whether accidents at road/train crossings has been incr
 The equation for the model will be:
 
 $$
-\ln{(\text{E(\num collisions}_i)/km_i)} = \beta_0+\beta_1(time)_i
+\ln{(\text{E(collisions}_i)/km_i)} = \beta_0+\beta_1(time)_i
 $$
 
 $$
-\ln{(\text{E(\num collisions}_i))} = \beta_0+\beta_1(time)_i +\ln(km_i)
+\ln{(\text{E(collisions}_i))} = \beta_0+\beta_1(time)_i +\ln(km_i)
 $$
 
 ```r
@@ -518,21 +518,21 @@ The fit equation is
 - the equation that gives the estimated number of accidents:
 
 $$
-\ln{(\text{E(\num collisions}_i))} = -4.21142-0.03292(time)_i +\ln(km_i)
+\ln{(\text{E(collisions}_i))} = -4.21142-0.03292(time)_i +\ln(km_i)
 $$
 
 $$
-\text{E(\num collisions}_i) = (km_i)e^{-4.21142-0.03292(time)_i +\ln(km_i)}
+\text{E(collisions}_i) = (km_i)e^{-4.21142-0.03292(time)_i +\ln(km_i)}
 $$
 
 - the equation that gives the estimated number of accidents ****************************per million km:****************************
 
 $$
-\ln{(\text{E(\num collisions}_i)/km_i)} = -4.21142-0.03292(time)_i +\ln(km_i)
+\ln{(\text{E(collisions}_i)/km_i)} = -4.21142-0.03292(time)_i +\ln(km_i)
 $$
 
 $$
-\text{E(\num collisions}_i)/km_i = e^{-4.21142-0.03292(time)_i +\ln(km_i)}
+\text{E(collisions}_i)/km_i = e^{-4.21142-0.03292(time)_i +\ln(km_i)}
 $$
 
 The `predict()` function will automatically predict ln(E(Y))
