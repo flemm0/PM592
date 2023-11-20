@@ -34,15 +34,15 @@ Let the random variable T represent the time to event. We can describe the distr
 1. Survival Function. The probability that an individual survives past time t.
 
 $$
-\text{S(t) = P(T > t) =} cumulative survival probability
+\text{S(t) = P(T > t) =} \text{cumulative survival probability}
 $$
 
 $$
-\text{S(0) = 1, }\: \text{S(}\infty\text{) = 0}
+\text{S(0) = 1, } \text{S(}\infty\text{) = 0}
 $$
 
 $$
-\text{F(t) = 1 - S(t) = P(T}\le\text{t)} = cumulative disease/event probability
+\text{F(t) = 1 - S(t) = P(T}\le\text{t)} = \text{cumulative disease/event probability}
 $$
 
 - cumulative survival probability will never increase over time, cumulative event probability will never decrease over time
@@ -66,14 +66,14 @@ $$
 When time is measured in intervals, the survival function can be expressed as:
 
 $$
-\text{S(t)} = \text{P(T > t)} = \sum_{i_{j}>p}p(t_j)\:\text{where} \:p(t_j) = \text{P(T =}\:t_j\text{)}
+\text{S(t)} = \text{P(T > t)} = \sum_{i_{j}>p}p(t_j) \text{where} p(t_j) = \text{P(T =}t_j\text{)}
 $$
 
 - P is the probability an event occurs in interval $t_j$
 1. Hazard Rate. The probability an individual who is free of disease at time t has the event in the next instant of time
 
 $$
-\lambda(t) = \lim_{dt \to 0}\frac{P(t \le T \lt t+dt\:|\:T \ge t)}{dt}
+\lambda(t) = \lim_{dt \to 0}\frac{P(t \le T \lt t+dt | T \ge t)}{dt}
 $$
 
 $$
