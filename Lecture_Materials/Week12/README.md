@@ -34,7 +34,7 @@ Let the random variable T represent the time to event. We can describe the distr
 1. Survival Function. The probability that an individual survives past time t.
 
 $$
-\text{S(t) = P(T > t)\:=}\: cumulative\:survival\;probability
+\text{S(t) = P(T > t) =} cumulative survival probability
 $$
 
 $$
@@ -42,7 +42,7 @@ $$
 $$
 
 $$
-\text{F(t) = 1 - S(t) = P(T}\le\text{t)}\:=\:cumulative \:disease/event\:probability
+\text{F(t) = 1 - S(t) = P(T}\le\text{t)} = cumulative disease/event probability
 $$
 
 - cumulative survival probability will never increase over time, cumulative event probability will never decrease over time
