@@ -457,9 +457,9 @@ coxph(formula = surv_object ~ rx + age + ecog_good + r_disease, data = ovarian)
 - the general shape of the curve is given by the baseline survival function ($\lambda_0(t)$)
     - the covariates proportionally modify that curve
 
-$$
+```math
 \lambda(t, x) = \lambda_0(t)e^{\beta_1X_{\text{RX}}+\beta_2X_{\text{AGE}}+\beta_3X_{\text{ECOG\_GOOD}}+\beta_4X_{\text{R\_DISEASE}}}
-$$
+```
 
 - if for example, there is a violation of proportional hazards with the ECOG variable, we can create a different baseline hazard function for each stratum of ECOG
 
@@ -467,9 +467,9 @@ $$
 coxph(surv_object ~ rx + age + r_disease + strata(ecog_good), data = ovarian)
 ```
 
-$$
+```math
 \lambda(t, x) = \lambda_{0,i}(t)e^{\beta_1X_{\text{RX}}+\beta_2X_{\text{AGE}}+\beta_4X_{\text{R\_DISEASE}}}
-$$
+```
 
 - i=1, ecog good; i= 0, ecog bad
 - now, the baseline hazard curves for each stratum of `ecog_good` are not constrained to being proportional
