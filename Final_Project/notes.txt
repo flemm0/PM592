@@ -1,0 +1,12 @@
+outcome variable: fasting glucose levels
+
+independent variables: physical activity, how healthy is diet
+
+confounder: age, bmi
+
+interaction: drink alcohol, gender
+
+
+Moderate MET-minutes/week = 4.0 * moderate-intensity activity minutes * moderate days
+Vigorous MET-minutes/week = 8.0 * vigorous-intensity activity minutes * vigorous-intensity days
+A combined total physical activity MET-min/week can be computed as the sum of Walking + Moderate + Vigorous MET-min/week scores.
