@@ -4,6 +4,7 @@ library(survminer)
 library(tidyverse)
 library(mfp)
 library(sjPlot)
+library(magrittr)
 
 rm(list = ls())
 
@@ -41,3 +42,44 @@ ggcoxzph(cox.zph(cox_adj_m))
 # 1d
 cox_str_adj_m <- coxph(surv_obj ~ dose + prison + strata(clinic), data = addicts)
 summary(cox_str_adj_m)
+
+# Cox-Snell residuals
+coxph(
+  Surv(addicts$status - residuals(cox_str_adj_m, type = "martingale"), status) ~ 1, 
+  data = addicts) %>%
+  basehaz() %>%
+  ggplot(aes(x = time, y = hazard)) + 
+  geom_point() + 
+  geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red")
+
+# deviance residuals
+ggcoxdiagnostics(cox_str_adj_m, type = "deviance", sline = F, 
+                 ox.scale = "observation.id") +
+  geom_hline(yintercept = 2, color = "orange") +
+  geom_hline(yintercept = -2, color = "orange")
+
+influential_pts <- residuals(cox_str_adj_m, type = "deviance") %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(abs(.) > 2)
+influential_pts
+
+addicts[pull(influential_pts, rowname), ]
+
+# dfbeta
+ggcoxdiagnostics(cox_str_adj_m, type = "dfbeta", sline = F) +
+  geom_hline(data = bind_rows(
+    tibble(val = abs(coefficients(cox_str_adj_m)*.1),
+           covariate = names(coefficients(cox_str_adj_m))),
+    tibble(val = -abs(coefficients(cox_str_adj_m)*.1),
+           covariate = names(coefficients(cox_str_adj_m)))),
+    aes(yintercept = val), color = "orange") 
+
+high_dfbetas <- residuals(cox_str_adj_m, type = "dfbeta") %>%
+  data.frame() %>%
+  set_colnames(names(coefficients(cox_str_adj_m))) %>%
+  rownames_to_column() %>%
+  filter(abs(prison) > coefficients(cox_str_adj_m)["prison"]/10)
+
+addicts[pull(high_dfbetas, rowname), ]
