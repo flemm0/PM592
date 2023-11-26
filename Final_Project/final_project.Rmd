@@ -1,0 +1,19 @@
+```{r}
+library(arrow)
+library(tidyverse)
+
+rm(list = ls())
+
+nhanes <- arrow::read_parquet("./data/nhanes.parquet")
+```
+
+```{r}
+skim(nhanes)
+```
+
+```{r}
+nhanes %>%
+  na.omit() %>%
+  mutate(gender)
+```
+
