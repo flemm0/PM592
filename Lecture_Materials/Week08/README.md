@@ -225,15 +225,15 @@ The Generalized Linear Model
                 - binomial, multinomial, Poisson, etc.
         - The **link function** allows us to use linear systematic components to predict an outcome that isn’t necessarily normally distributed
         - we have to ask: what **********transformation of Y********** would express the systematic component as a linear function of the covariates?
-        - the link function is given as $g(\mu)$:
-        
-```math
-g(u) = \beta_0+\beta_1x_1+\beta_2x_2+...=\sum^{p}_{j=1}\beta_jx_{ij}
-```
-        
         - it is a transformation we make on the expected value so it conforms to a different distribution
         - for linear regression, we don’t need to perform any transformation on the outcome $Y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ...$, we can use the predicted Y values as-is
             - so the identity link is: $g(\mu) = \mu$
+        - the link function is given as $g(\mu)$:
+        
+          $$
+          g(u) = \beta_0+\beta_1x_1+\beta_2x_2+...=\sum^{p}_{j=1}\beta_jx_{ij}
+          $$
+
 
 - Linear models use the **identity link**
 - Models that are nonlinear use a different link
@@ -246,13 +246,8 @@ Example: examine a model to predict child’s asthma from mother and father
 - we can get a result, but there is no guarantee that the model will make sense
 - the range of linear regression is ($-\infty$ to $\infty$). Since the outcome is a probability, anything outside of [0,1] is nonsensical
 - additionally, performing an OLS regression on a binary outcome will ensure that the residuals are NOT normally distributed (though this is less of a problem with larger sample size)
-- Solution: **the logit link**
+- Solution: **the logit link**: $\text{logit}(\pi_i) = \ln(\frac{\pi_i}{1-\pi_i})$
     - The logit is one function that will yield predictions constrained between 0 and 1
-    
-    $$
-    \text{logit}(\pi_i) = \ln(\frac{\pi_i}{1-\pi_i})
-    $$
-    
     - logit is another way of saying log odds; this is the same formula for the log odds
     - note: we could also use $\mu_i$ instead of $\pi_i$
     - In extreme cases:
