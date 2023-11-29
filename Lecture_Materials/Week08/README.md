@@ -227,9 +227,9 @@ The Generalized Linear Model
         - we have to ask: what **********transformation of Y********** would express the systematic component as a linear function of the covariates?
         - the link function is given as $g(\mu)$:
         
-        $$
-        g(u) = \beta_0+\beta_1x_1+\beta_2x_2+...=\sum^{p}_{j=1}\beta_jx_{ij}
-        $$
+```math
+g(u) = \beta_0+\beta_1x_1+\beta_2x_2+...=\sum^{p}_{j=1}\beta_jx_{ij}
+```
         
         - it is a transformation we make on the expected value so it conforms to a different distribution
         - for linear regression, we don’t need to perform any transformation on the outcome $Y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ...$, we can use the predicted Y values as-is
@@ -286,9 +286,9 @@ $$
     - when X = 0, $\text{logit}(\hat{\pi}) = \beta_0$.
         - we can convert this to a “baseline probability” (probability of observing Y = 1 when all X = 0):
     
-    $$
-    \text{P(Y=1|X=0)} = \frac{e^{\beta_0}}{1+e^{\beta_0}}
-    $$
+```math
+\text{P(Y=1|X=0)} = \frac{e^{\beta_0}}{1+e^{\beta_0}}
+```
     
     - the slope $\beta_1$ is the change in log odds (logit) for a 1-unit increase in X
     - looking at slope in terms of predicted probability instead of predicted logit:
