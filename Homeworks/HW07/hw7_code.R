@@ -11,7 +11,7 @@ head(intrinsic)
 ## Question 2
 
 # 2a
-m <- glm(enjoyex ~ ewc, data = intrinsic)
+m <- glm(enjoyex ~ ewc, family = binomial, data = intrinsic)
 summary(m)
 
 # 2b
@@ -19,7 +19,7 @@ intrinsic$pred_logits <- predict(m, type = "link")
 ggplot(intrinsic, aes(x=ewc, y=pred_logits)) + geom_point()
 
 # 2c
-m.2 <- glm(enjoyex ~ factor(ewc), data = intrinsic)
+m.2 <- glm(enjoyex ~ factor(ewc), family = binomial, data = intrinsic)
 summary(m.2)
 anova(m.2, test = "LRT")
 
