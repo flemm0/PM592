@@ -1,6 +1,7 @@
 ```{r}
 library(arrow)
 library(tidyverse)
+library(skimr)
 
 rm(list = ls())
 
@@ -14,6 +15,6 @@ skim(nhanes)
 ```{r}
 nhanes %>%
   na.omit() %>%
-  mutate(gender)
+  mutate(gender = ifelse(gender == 2, 0, gender))
 ```
 
