@@ -6,9 +6,9 @@ library(mfp)
 library(AER)
 library(sjPlot)
 
-source("Lecture_Materials/Week11/pois_gof.R")
-
 rm(list = ls())
+
+source("Lecture_Materials/Week11/pois_gof.R")
 
 fiji <- haven::read_dta("data/fiji.dta")
 
@@ -36,6 +36,13 @@ anova(educ_lin_model, educ_fact_model, test="LRT") # it appears that encoding ed
 emmeans(educ_fact_model, "educ", offset = log(1), type = "response")
 pois_dev_gof(educ_fact_model)
 pois_pearson_gof(educ_fact_model)
+
+# determine functional form of dur
+anova(
+  glm(totborn ~ factor(educ) + factor(res) + dur + offset(log(n)), family = poisson, data = fiji),
+  glm(totborn ~ factor(educ) + factor(res) + factor(dur) + offset(log(n)), family = poisson, data = fiji),
+  test="LRT"
+)
 
 # 1d
 educ_adj_model <- glm(totborn ~ factor(educ) + res + dur + offset(log(n)), family = poisson, data = fiji)
