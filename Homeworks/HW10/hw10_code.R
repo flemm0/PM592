@@ -27,13 +27,17 @@ exp(1.376346 + 1.96 * 0.009712)
 pois_dev_gof(null_model)
 pois_pearson_gof(null_model)
 
+## convert variables to factor
+fiji <- fiji %>%
+  mutate(educ.f = factor(educ), res.f = factor(res), dur.f = factor(dur))
+
 # 1c
 educ_lin_model <- glm(totborn ~ educ + offset(log(n)), family = poisson, data = fiji)
-educ_fact_model <- glm(totborn ~ factor(educ) + offset(log(n)), family = poisson, data = fiji)
+educ_fact_model <- glm(totborn ~ educ.f + offset(log(n)), family = poisson, data = fiji)
 summary(educ_lin_model)
 summary(educ_fact_model)
 anova(educ_lin_model, educ_fact_model, test="LRT") # it appears that encoding education as a factor variable improves model fit significantly (p<0.001)
-emmeans(educ_fact_model, "educ", offset = log(1), type = "response")
+emmeans(educ_fact_model, "educ.f", offset = log(1), type = "response")
 pois_dev_gof(educ_fact_model)
 pois_pearson_gof(educ_fact_model)
 
@@ -45,9 +49,13 @@ anova(
 )
 
 # 1d
-educ_adj_model <- glm(totborn ~ factor(educ) + res + dur + offset(log(n)), family = poisson, data = fiji)
-anova(educ_fact_model, educ_adj_model, test = "LRT")
+# educ_adj_model <- glm(totborn ~ factor(educ) + res + dur + offset(log(n)), family = poisson, data = fiji)
+# need to encode dur and res as categorical
+educ_adj_model <- glm(totborn ~ educ.f + res.f + dur.f + offset(log(n)), family = poisson, data = fiji)
 summary(educ_adj_model)
+
+anova(educ_fact_model, educ_adj_model, test = "LRT")
+#summary(educ_adj_model)
 sjPlot::tab_model(educ_fact_model, educ_adj_model)
 pois_dev_gof(educ_adj_model)
 pois_pearson_gof(educ_adj_model)
@@ -57,5 +65,6 @@ pois_pearson_gof(educ_adj_model)
 
 # 2a
 AER::dispersiontest(educ_adj_model)
-educ_nb_model <- MASS::glm.nb(totborn ~ factor(educ) + res + dur + offset(log(n)), data = fiji)
+#educ_nb_model <- MASS::glm.nb(totborn ~ factor(educ) + res + dur + offset(log(n)), data = fiji)
+educ_nb_model <- MASS::glm.nb(totborn ~ educ.f + res.f + dur.f + offset(log(n)), data = fiji)
 summary(educ_nb_model)
