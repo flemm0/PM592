@@ -1,3 +1,9 @@
+---
+title: "PM 592 Final Project"
+author: "Flemming Wu"
+date: "`r Sys.Date()`"
+---
+
 ```{r clear env and read in data, message=F, warning=F}
 library(arrow)
 library(tidyverse)
@@ -9,6 +15,8 @@ library(gtools)
 library(psych)
 library(gridExtra)
 library(ggfortify)
+library(olsrr)
+
 
 rm(list = ls())
 
@@ -18,6 +26,7 @@ nhanes <- arrow::read_parquet("./data/nhanes.parquet")
 ```{r}
 psych::describe(nhanes)
 ```
+
 ```{r}
 skimr::skim(nhanes)
 ```
@@ -27,7 +36,7 @@ skimr::skim(nhanes)
 skim(nhanes) %>%
   as_tibble() %>%
   dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.hist) %>%
-  filter(skim_variable != "SEQN") %>% 
+  filter(!skim_variable %in% c("SEQN", "fasting_subsample_weight")) %>% 
   mutate(numeric.mean = round(numeric.mean, 2), numeric.sd = round(numeric.sd, 2)) %>%
   rename(missing = n_missing, mean = numeric.mean, `standard deviation` = numeric.sd, distribution = numeric.hist) %>%
   gt(rowname_col = "skim_variable", caption = "Table 1")
@@ -35,8 +44,9 @@ skim(nhanes) %>%
 
 ```{r omit missing values}
 # remove rows with missing values
-# create "male" variable from "gender"
-nhanes <- na.omit(nhanes)
+# remove rows of participants whom provided blood specimen but did not meet the 8 to less than 24 hour fasting criteria
+nhanes <- na.omit(nhanes) %>%
+  filter(fasting_subsample_weight != 0)
 ```
 
 ```{r check variable distributions, fig.width=7, fig.height=4}
@@ -98,6 +108,15 @@ nhanes %>%
 #lm(glucose ~ diet_health, data = nhanes) %>% autoplot()
 ```
 
+```{r sleep hours univariate model}
+lm(glucose ~ sleep_hrs, data = nhanes) %>% summary()
+
+nhanes %>%
+  ggplot(aes(x=sleep_hrs, y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm")
+
+```
 
 ```{r determine functional form of MET score}
 mfp(glucose ~ fp(met), data = nhanes) # fractional polynomials suggests log transformation
@@ -127,9 +146,25 @@ nhanes %>%
 mfp(glucose ~ fp(sleep_hrs), data = nhanes) # suggests a linear encoding, I will keep sleep hours as linear
 ```
 
+```{r}
+lm(glucose ~ sleep_hrs, data = nhanes) %>% summary()
+
+ggplot(data = nhanes, aes(x=sleep_hrs, y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm")
+```
+
+
 ```{r unadjusted model}
-lm(glucose ~ met_log + diet_health, data = nhanes) %>%
-  summary()
+unadj.m <- lm(glucose ~ met_log + diet_health + sleep_hrs, data = nhanes)
+summary(unadj.m)
+autoplot(unadj.m)
+
+
+# check normality
+psych::describe(unadj.m$residuals)
+hist(unadj.m$residuals, breaks = 30)
+shapiro.test(unadj.m$residuals)
 ```
 Check functional form for other variables
 
@@ -198,61 +233,131 @@ summary(lm(glucose ~ bmi_cat, data = nhanes))
 
 ## Check interaction terms
 
-```{r alcohol frequency interactions}
-lm(glucose ~ alcohol_frequency.f*(met_log + diet_health), data = nhanes) %>% summary()
+```{r interactions}
+# build full model
+# test significance of interactions by removing individual interaction terms
+
+# full model
+lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes) %>% summary()
 
 anova(
-  lm(glucose ~ met_log + diet_health, data = nhanes),
-  lm(glucose ~ alcohol_frequency.f*met_log + diet_health, data = nhanes)
-) # alcohol use is a significant interaction term for met activity score (p<0.001)
+  lm(glucose ~ diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes),
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes)
+) # alcohol frequency and diet health interaction not significant (p = 0.23)
 
 anova(
-  lm(glucose ~ met_log + diet_health, data = nhanes),
-  lm(glucose ~ met_log + alcohol_frequency.f*diet_health, data = nhanes)
-) # significant interaction term for diet health as well (p<0.001)
+  lm(glucose ~ alcohol_frequency.f * diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes)
+) # alcohol frequency and sleep hours interaction not significant (p = 0.77)
+
+anova(
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat + met_log , data = nhanes),
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes)
+) # bmi and met activity score significant (p = 0.097)
 ```
-```{r bmi interactions}
-lm(glucose ~ bmi_cat*(met_log + diet_health), data = nhanes) %>% summary()
+It looks like met activity score and bmi interact (p = 0.097) at an alpha level of 0.15, so I will keep it in the model
 
-anova(
-  lm(glucose ~ met_log + diet_health, data = nhanes),
-  lm(glucose ~ bmi_cat*met_log + diet_health, data = nhanes)
-) # significant interaction term for met activity score
 
-anova(
-  lm(glucose ~ met_log + diet_health, data = nhanes),
-  lm(glucose ~ bmi_cat*met_log + diet_health, data = nhanes)
-) # significant interaction term for diet
-```
-It looks like frequency of alcohol consumption is an effect modifier for MET activity score (p = 0.04) and bmi is an effect modifier for diet health (p=0.14).
+## Check for confounders
 
-```{r}
-lm(glucose ~ alcohol_frequency*met_log + bmi*diet_health, data = nhanes) %>% summary()
-```
-
-Check for confounders
-
-```{r}
+```{r confounding check}
+# reduced output for viewing
 tab_model(
-  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health, data = nhanes),
-  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age, data = nhanes),
-  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + gender, data = nhanes),
-  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age + gender, data = nhanes)
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + gender, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes),
+  terms = c("diet_health", "sleep_hrs", "met_log"),
+  dv.labels = c("Unadjusted", "Age Adjusted", "Gender Adjusted", "Age and Gender Adjusted")
 )
 ```
 
-Age and gender both appear to confound relationship between MET activity score and glucose.
-Age appears to confound the relationship between diet health score and glucose.
+```{r adjusted models output}
+# full output for display
+pred.labels <- c("(Intercept)", "Diet Health Score", "Sleep Hours", "Underweight", "Overweight", "Obese", "log(MET)",
+                "Underweight:log(MET)", "Overweight:log(MET)", "Obese:log(MET)", "Age", "Gender")
 
-I will leave age and gender in the model.
+tab_model(
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + gender, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes),
+  show.reflvl = T, 
+  pred.labels = pred.labels,
+  dv.labels = c("Unadjusted", "Age Adjusted", "Gender Adjusted", "Age and Gender Adjusted"),
+  CSS = list(
+    css.depvarhead = 'color: red;',
+    css.centeralign = 'text-align: left;', 
+    css.firsttablecol = 'font-weight: bold;', 
+    css.summary = 'color: blue;'
+  )
+)
+```
 
-Final model
+Age and gender seems to confound the relationship between MET and glucose as well as diet health and glucose. I will leave them both in the final model.
+
+### Preliminary Final model
 ```{r}
-m1<- lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age + gender, data = nhanes)
+m1<- lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes)
 summary(m1)
 ```
 
 ```{r}
-plot(m1)
+autoplot(m1)
+```
+Normality and Homoscedasticity appear to be violated
+
+```{r}
+ggplot() +
+  geom_qq(aes(sample = rstandard(m1))) +
+  geom_abline(color = "red")
+```
+
+Try transforming y to log(y+c), where c = 1 - min(y) 
+
+```{r}
+nhanes <- nhanes %>%
+  mutate(glucose_log = log(glucose + (1 - min(glucose))))
+
+m2 <- lm(glucose_log ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes)
+
+autoplot(m2)
+```
+
+```{r}
+ggplot() +
+  geom_qq(aes(sample = rstandard(m2))) +
+  geom_abline(color = "red")
+```
+Normality looks better now. Homoscedasticity looks better as well.
+
+```{r}
+ols_plot_resid_stud(m2)
+ols_plot_dffits(m2, print_plot = FALSE)
+#ols_plot_dfbetas(m2, print_plot = FALSE)
+```
+
+```{r}
+ols_plot_resid_lev(m2)
+```
+Observations 3396, 2519, and 2460 seems to be influential points.
+
+```{r}
+cbind(
+  pred = predict(m2, newdata = nhanes[c(3396, 2519, 2460),]),
+  nhanes[c(3396, 2519, 2460), c(ncol(nhanes), seq_along(names(nhanes)[-ncol(nhanes)]))]
+)
+
+```
+
+The data points look reasonable, there is no compelling reason to remove them from the model.
+
+```{r}
+tab_model(m2)
+```
+
+```{r}
+sim_slopes(m2, pred = met_log, modx = bmi_cat)
+interact_plot(m2, pred = met_log, modx = bmi_cat)
 ```
 

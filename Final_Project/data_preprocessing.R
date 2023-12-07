@@ -9,9 +9,9 @@ library(arrow)
 # interaction terms: drink alcohol, gender
 
 glu <- haven::read_xpt("Final_Project/data/P_GLU.XPT", 
-                       col_select = c("SEQN", "LBXGLU")) %>% 
+                       col_select = c("SEQN", "WTSAFPRP", "LBXGLU")) %>% 
   data.frame() %>%
-  rename("glucose" = "LBXGLU")
+  rename("fasting_subsample_weight" = "WTSAFPRP", "glucose" = "LBXGLU")
 
 demographics <- haven::read_xpt("Final_Project/data/P_DEMO.XPT", 
                                 col_select = c("SEQN", "RIAGENDR", "RIDAGEYR")) %>%

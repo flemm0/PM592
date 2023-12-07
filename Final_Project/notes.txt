@@ -4,7 +4,7 @@ independent variables: physical activity, how healthy is diet, sleep hours
 
 confounder: age, gender
 
-interaction: drink alcohol, bmi
+interaction: drink alcohol with sleep hours and diet health, bmi with physical activity
 
 
 Moderate MET-minutes/week = 4.0 * moderate-intensity activity minutes * moderate days
