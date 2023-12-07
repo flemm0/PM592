@@ -1,10 +1,10 @@
 outcome variable: fasting glucose levels
 
-independent variables: physical activity, how healthy is diet
+independent variables: physical activity, how healthy is diet, sleep hours
 
-confounder: age, bmi
+confounder: age, gender
 
-interaction: drink alcohol, gender
+interaction: drink alcohol, bmi
 
 
 Moderate MET-minutes/week = 4.0 * moderate-intensity activity minutes * moderate days

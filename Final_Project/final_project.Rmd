@@ -1,7 +1,14 @@
-```{r}
+```{r clear env and read in data, message=F, warning=F}
 library(arrow)
 library(tidyverse)
 library(skimr)
+library(gt)
+library(mfp)
+library(sjPlot)
+library(gtools)
+library(psych)
+library(gridExtra)
+library(ggfortify)
 
 rm(list = ls())
 
@@ -9,12 +16,243 @@ nhanes <- arrow::read_parquet("./data/nhanes.parquet")
 ```
 
 ```{r}
-skim(nhanes)
+psych::describe(nhanes)
+```
+```{r}
+skimr::skim(nhanes)
+```
+
+
+```{r table 1}
+skim(nhanes) %>%
+  as_tibble() %>%
+  dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.hist) %>%
+  filter(skim_variable != "SEQN") %>% 
+  mutate(numeric.mean = round(numeric.mean, 2), numeric.sd = round(numeric.sd, 2)) %>%
+  rename(missing = n_missing, mean = numeric.mean, `standard deviation` = numeric.sd, distribution = numeric.hist) %>%
+  gt(rowname_col = "skim_variable", caption = "Table 1")
+```
+
+```{r omit missing values}
+# remove rows with missing values
+# create "male" variable from "gender"
+nhanes <- na.omit(nhanes)
+```
+
+```{r check variable distributions, fig.width=7, fig.height=4}
+p1 <- nhanes %>%
+  ggplot(aes(x=diet_health)) +
+  geom_bar()
+
+p2 <- nhanes %>%
+  ggplot(aes(x=age)) +
+  geom_histogram(bins=30)
+
+p3 <- nhanes %>%
+  ggplot(aes(x=glucose)) +
+  geom_histogram(bins=50)
+
+p4 <- nhanes %>%
+  ggplot(aes(x=sleep_hrs)) +
+  geom_bar()
+
+p5 <- nhanes %>%
+  ggplot(aes(x=gender)) +
+  geom_bar()
+
+p6 <- nhanes %>%
+  ggplot(aes(x=bmi)) +
+  geom_histogram(bins=30)
+
+p7 <- nhanes %>%
+  ggplot(aes(x=alcohol_frequency)) +
+  geom_bar()
+
+p8 <- nhanes %>%
+  ggplot(aes(x=met)) +
+  geom_histogram(bins=50)
+
+grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8)
+```
+
+Univariate Analyses
+
+```{r determine functional form of diet health}
+mfp(glucose ~ fp(diet_health), data = nhanes) # fractional polynomials suggests linear encoding of diet health score
+
+anova(
+  lm(glucose ~ diet_health, data = nhanes),
+  lm(glucose ~ factor(diet_health), data = nhanes)
+) # categorical encoding of diet health doesn't improve model fit
+
+# keep diet health as linear
+```
+```{r diet health univariate model}
+lm(glucose ~ diet_health, data = nhanes) %>% summary()
+
+nhanes %>%
+  ggplot(aes(x=diet_health, y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm")
+
+#lm(glucose ~ diet_health, data = nhanes) %>% autoplot()
+```
+
+
+```{r determine functional form of MET score}
+mfp(glucose ~ fp(met), data = nhanes) # fractional polynomials suggests log transformation
+
+anova(
+  lm(glucose ~ met, data = nhanes),
+  nhanes %>% dplyr::mutate(met.quint = quantcut(met, q = 5)) %>% lm(glucose ~ met.quint, data = .)
+) # improves model fit
+
+# I will use a log-transformation of met score
+
+nhanes <-
+  nhanes %>%
+  mutate(met_log = log(((met+4)/10000)))
+```
+
+```{r met activity score univariate model}
+lm(glucose ~ met_log, data = nhanes) %>% summary()
+
+nhanes %>%
+  ggplot(aes(x=met_log, y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm")
+```
+
+```{r determine functional form of sleep hours}
+mfp(glucose ~ fp(sleep_hrs), data = nhanes) # suggests a linear encoding, I will keep sleep hours as linear
+```
+
+```{r unadjusted model}
+lm(glucose ~ met_log + diet_health, data = nhanes) %>%
+  summary()
+```
+Check functional form for other variables
+
+```{r age functional form}
+mfp(glucose ~ fp(age), data = nhanes) # I((age/100)^2)+I((age/100)^3)
+
+anova(
+  lm(glucose ~ met, data = nhanes),
+  nhanes %>% dplyr::mutate(age.quint = quantcut(age, q = 5)) %>% lm(glucose ~ age.quint, data = .)
+) # improves model fit
+
+# use age quintile, as it is easier to interpret than a square + cubed term
+
+nhanes <-
+  nhanes %>%
+  dplyr::mutate(age.quint = quantcut(age, q = 5))
+```
+
+```{r convert gender to categorical}
+nhanes <-
+  nhanes %>%
+  mutate(gender.f = factor(gender))
+```
+
+```{r alcohol frequency functional form}
+mfp(glucose ~ fp(alcohol_frequency), data = nhanes) # I(((alcohol_frequency+1)/10)^-2)+log(((alcohol_frequency+1)/10))
+
+anova(
+  lm(glucose ~ alcohol_frequency, data = nhanes),
+  nhanes %>%
+    mutate(alcohol_frequency.f = as.factor(ifelse(alcohol_frequency == 0, 0, ifelse(alcohol_frequency <= 5, 1, 2)))) %>%
+    lm(glucose ~ alcohol_frequency.f, data = .)
+) # better fit (p<0.001)
+
+# I will encode alcohol frequency as a categorical variable 0 meaning 0 drinks, 1 meaning 1-5 drinks, 2 meaning 6-10 drinks
+
+nhanes <-
+  nhanes %>%
+    mutate(alcohol_frequency.f = as.factor(ifelse(alcohol_frequency == 0, 0, ifelse(alcohol_frequency <= 5, 1, 2))))
+```
+
+```{r bmi functional form}
+mfp(glucose ~ fp(bmi), data = nhanes) # 1/sqrt(bmi) is the suggested transformation for bmi
+
+nhanes %>%
+  ggplot(aes(x=bmi, y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm", se = T)
+
+summary(lm(glucose ~ bmi, data = nhanes))
+
+# convert bmi to categorical
+nhanes <-
+  nhanes %>%
+  mutate(bmi_cat = cut(bmi, breaks = c(0, 18.5, 25, 30, 100), right = F, labels = c("Underweight", "Healthy Weight", "Overweight", "Obese"))) %>%
+  mutate(bmi_cat = relevel(bmi_cat, ref="Healthy Weight"))
+
+nhanes %>%
+  ggplot(aes(x=bmi_cat, y=glucose, fill=bmi_cat)) +
+  geom_boxplot()
+
+summary(lm(glucose ~ bmi_cat, data = nhanes))
+
+```
+
+
+## Check interaction terms
+
+```{r alcohol frequency interactions}
+lm(glucose ~ alcohol_frequency.f*(met_log + diet_health), data = nhanes) %>% summary()
+
+anova(
+  lm(glucose ~ met_log + diet_health, data = nhanes),
+  lm(glucose ~ alcohol_frequency.f*met_log + diet_health, data = nhanes)
+) # alcohol use is a significant interaction term for met activity score (p<0.001)
+
+anova(
+  lm(glucose ~ met_log + diet_health, data = nhanes),
+  lm(glucose ~ met_log + alcohol_frequency.f*diet_health, data = nhanes)
+) # significant interaction term for diet health as well (p<0.001)
+```
+```{r bmi interactions}
+lm(glucose ~ bmi_cat*(met_log + diet_health), data = nhanes) %>% summary()
+
+anova(
+  lm(glucose ~ met_log + diet_health, data = nhanes),
+  lm(glucose ~ bmi_cat*met_log + diet_health, data = nhanes)
+) # significant interaction term for met activity score
+
+anova(
+  lm(glucose ~ met_log + diet_health, data = nhanes),
+  lm(glucose ~ bmi_cat*met_log + diet_health, data = nhanes)
+) # significant interaction term for diet
+```
+It looks like frequency of alcohol consumption is an effect modifier for MET activity score (p = 0.04) and bmi is an effect modifier for diet health (p=0.14).
+
+```{r}
+lm(glucose ~ alcohol_frequency*met_log + bmi*diet_health, data = nhanes) %>% summary()
+```
+
+Check for confounders
+
+```{r}
+tab_model(
+  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health, data = nhanes),
+  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age, data = nhanes),
+  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + gender, data = nhanes),
+  lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age + gender, data = nhanes)
+)
+```
+
+Age and gender both appear to confound relationship between MET activity score and glucose.
+Age appears to confound the relationship between diet health score and glucose.
+
+I will leave age and gender in the model.
+
+Final model
+```{r}
+m1<- lm(glucose ~ met_log*alcohol_frequency + bmi*diet_health + age + gender, data = nhanes)
+summary(m1)
 ```
 
 ```{r}
-nhanes %>%
-  na.omit() %>%
-  mutate(gender = ifelse(gender == 2, 0, gender))
+plot(m1)
 ```
 

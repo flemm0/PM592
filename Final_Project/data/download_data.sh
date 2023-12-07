@@ -29,3 +29,8 @@ fi
 if [ ! -e 'P_DBQ.XPT' ]; then
   wget https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_DBQ.XPT
 fi
+
+# sleep
+if [ ! -e 'SLQ_J.XPT']; then
+  wget https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_SLQ.XPT
+fi
