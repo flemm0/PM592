@@ -90,10 +90,8 @@ nhanes <-
 # https://www.physio-pedia.com/images/c/c7/Quidelines_for_interpreting_the_IPAQ.pdf
 nhanes <-
   nhanes |>
-  mutate(met = (4*avg_mins_moderate_work*days_moderate_work) + 
-               (4*avg_mins_moderate_recr_activity*days_moderate_recr_activity) +
-               (8*avg_mins_vigorous_work*days_vigorous_work) +
-               (8*avg_mins_vigorous_recr_activity*days_vigorous_recr_activity)
+  mutate(met = ((4*avg_mins_moderate_work*days_moderate_work) + (4*avg_mins_moderate_recr_activity*days_moderate_recr_activity)) +
+               (8*avg_mins_vigorous_work*days_vigorous_work) + (8*avg_mins_vigorous_recr_activity*days_vigorous_recr_activity)
            )
 
 nhanes |>

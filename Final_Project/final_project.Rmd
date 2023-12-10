@@ -27,12 +27,27 @@ nhanes <- arrow::read_parquet("./data/nhanes.parquet")
 psych::describe(nhanes)
 ```
 
+```{r table 1}
+psych::describe(nhanes) %>%
+  select(-c(vars, trimmed, mad, range, skew, kurtosis, se)) %>%
+  slice(-c(1, 2)) %>%
+  cbind(variables = c("Glucose (mg/dL)", "Gender (1 = Male, 2 = Female)", "Age", "BMI (kg/m^2)", "Alcohol Frequency", "Diet Health Score", "Sleep Hours (Weekdays or Weekends)", "MET (activity score)")) %>% 
+  relocate(variables) %>%
+  sjPlot::tab_df(
+    x = .,
+    title = "Table 1",
+    show.rownames = F,
+    alternate.rows = T
+  )
+```
+
+
 ```{r}
 skimr::skim(nhanes)
 ```
 
 
-```{r table 1}
+```{r table 1 old, eval=F, include=F}
 skim(nhanes) %>%
   as_tibble() %>%
   dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.hist) %>%
@@ -85,7 +100,7 @@ p8 <- nhanes %>%
 grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8)
 ```
 
-Univariate Analyses
+## Univariate Analyses
 
 ```{r determine functional form of diet health}
 mfp(glucose ~ fp(diet_health), data = nhanes) # fractional polynomials suggests linear encoding of diet health score
@@ -153,6 +168,21 @@ ggplot(data = nhanes, aes(x=sleep_hrs, y=glucose)) +
   geom_point() +
   geom_smooth(formula = y ~ x, method = "lm")
 ```
+```{r}
+tab_model(
+  lm(glucose ~ met_log, data = nhanes),
+  lm(glucose ~ diet_health, data = nhanes),
+  lm(glucose ~ sleep_hrs, data = nhanes),
+  pred.labels = c("(Intercept)", "log(MET)", "Diet Health", "Sleep Hours"),
+  CSS = list(
+    css.depvarhead = 'color: red;',
+    css.centeralign = 'text-align: left;', 
+    css.firsttablecol = 'font-weight: bold;', 
+    css.summary = 'color: blue;'
+  ),
+  title = "Table 2"
+)
+```
 
 
 ```{r unadjusted model}
@@ -195,26 +225,32 @@ mfp(glucose ~ fp(alcohol_frequency), data = nhanes) # I(((alcohol_frequency+1)/1
 anova(
   lm(glucose ~ alcohol_frequency, data = nhanes),
   nhanes %>%
-    mutate(alcohol_frequency.f = as.factor(ifelse(alcohol_frequency == 0, 0, ifelse(alcohol_frequency <= 5, 1, 2)))) %>%
+    mutate(alcohol_frequency.f = factor(alcohol_frequency)) %>%
     lm(glucose ~ alcohol_frequency.f, data = .)
 ) # better fit (p<0.001)
 
-# I will encode alcohol frequency as a categorical variable 0 meaning 0 drinks, 1 meaning 1-5 drinks, 2 meaning 6-10 drinks
-
+# convert to categorical instead of complex transformation
 nhanes <-
   nhanes %>%
-    mutate(alcohol_frequency.f = as.factor(ifelse(alcohol_frequency == 0, 0, ifelse(alcohol_frequency <= 5, 1, 2))))
+    mutate(alcohol_frequency.f = factor(alcohol_frequency))
 ```
 
 ```{r bmi functional form}
-mfp(glucose ~ fp(bmi), data = nhanes) # 1/sqrt(bmi) is the suggested transformation for bmi
-
 nhanes %>%
   ggplot(aes(x=bmi, y=glucose)) +
   geom_point() +
   geom_smooth(formula = y ~ x, method = "lm", se = T)
 
 summary(lm(glucose ~ bmi, data = nhanes))
+
+mfp(glucose ~ fp(bmi), data = nhanes) # 1/sqrt(bmi) is the suggested transformation for bmi
+
+summary(lm(glucose ~ I(1/sqrt(bmi)), data = nhanes))
+
+nhanes %>%
+  ggplot(aes(x=1/sqrt(bmi), y=glucose)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm", se = T)
 
 # convert bmi to categorical
 nhanes <-
@@ -228,6 +264,11 @@ nhanes %>%
 
 summary(lm(glucose ~ bmi_cat, data = nhanes))
 
+
+## the 1/sqrt(bmi) transformation offers highest adjusted R-squared so I will use that as the encoding for BMI
+nhanes <-
+  nhanes %>%
+  mutate(bmi_sqrt = 1/sqrt(bmi))
 ```
 
 
@@ -248,12 +289,12 @@ anova(
 anova(
   lm(glucose ~ alcohol_frequency.f * diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
   lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes)
-) # alcohol frequency and sleep hours interaction not significant (p = 0.77)
+) # alcohol frequency and sleep hours interaction not significant (p = 0.37)
 
 anova(
-  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat + met_log , data = nhanes),
-  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_cat * met_log , data = nhanes)
-) # bmi and met activity score significant (p = 0.097)
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_sqrt + met_log , data = nhanes),
+  lm(glucose ~ alcohol_frequency.f * diet_health + alcohol_frequency.f * sleep_hrs + bmi_sqrt * met_log , data = nhanes)
+) # bmi and met activity score not significant (p = 0.27)
 ```
 It looks like met activity score and bmi interact (p = 0.097) at an alpha level of 0.15, so I will keep it in the model
 
@@ -263,34 +304,14 @@ It looks like met activity score and bmi interact (p = 0.097) at an alpha level 
 ```{r confounding check}
 # reduced output for viewing
 tab_model(
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age, data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + gender, data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + met_log , data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + met_log + age, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + met_log + gender.f, data = nhanes),
+  lm(glucose ~ diet_health + sleep_hrs + met_log + age + gender.f, data = nhanes),
   terms = c("diet_health", "sleep_hrs", "met_log"),
-  dv.labels = c("Unadjusted", "Age Adjusted", "Gender Adjusted", "Age and Gender Adjusted")
-)
-```
-
-```{r adjusted models output}
-# full output for display
-pred.labels <- c("(Intercept)", "Diet Health Score", "Sleep Hours", "Underweight", "Overweight", "Obese", "log(MET)",
-                "Underweight:log(MET)", "Overweight:log(MET)", "Obese:log(MET)", "Age", "Gender")
-
-tab_model(
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log , data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age, data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + gender, data = nhanes),
-  lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes),
-  show.reflvl = T, 
-  pred.labels = pred.labels,
+  pred.labels = c("Diet Health Score", "Sleep Hours", "log(MET)"),
   dv.labels = c("Unadjusted", "Age Adjusted", "Gender Adjusted", "Age and Gender Adjusted"),
-  CSS = list(
-    css.depvarhead = 'color: red;',
-    css.centeralign = 'text-align: left;', 
-    css.firsttablecol = 'font-weight: bold;', 
-    css.summary = 'color: blue;'
-  )
+  title = "Supplementary Table 1"
 )
 ```
 
@@ -298,7 +319,7 @@ Age and gender seems to confound the relationship between MET and glucose as wel
 
 ### Preliminary Final model
 ```{r}
-m1<- lm(glucose ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes)
+m1 <- lm(glucose ~ diet_health + sleep_hrs + met_log + age + gender, data = nhanes)
 summary(m1)
 ```
 
@@ -307,34 +328,73 @@ autoplot(m1)
 ```
 Normality and Homoscedasticity appear to be violated
 
-```{r}
+```{r assess normality of residuals for preliminary final model}
 ggplot() +
   geom_qq(aes(sample = rstandard(m1))) +
   geom_abline(color = "red")
+
+ggplot(data = nhanes, aes(x = m1$residuals)) +
+    geom_histogram(fill = 'steelblue', color = 'black', bins=30) +
+    labs(title = 'Figure 2', subtitle = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
 ```
 
 Try transforming y to log(y+c), where c = 1 - min(y) 
 
-```{r}
+```{r log transform glucose}
 nhanes <- nhanes %>%
   mutate(glucose_log = log(glucose + (1 - min(glucose))))
 
-m2 <- lm(glucose_log ~ diet_health + sleep_hrs + bmi_cat * met_log + age + gender, data = nhanes)
+m2 <- lm(glucose_log ~ diet_health + sleep_hrs + met_log + age + gender, data = nhanes)
 
 autoplot(m2)
 ```
 
-```{r}
-ggplot() +
+```{r reassess residuals}
+f4 <- ggplot() +
   geom_qq(aes(sample = rstandard(m2))) +
-  geom_abline(color = "red")
+  geom_abline(color = "red") +
+  labs(title = "Figure 4", subtitle = "Normal Q-Q")
+
+f5 <- ggplot(data = nhanes, aes(x = m1$residuals)) +
+    geom_histogram(fill = 'steelblue', color = 'black', bins=30) +
+    labs(title = 'Figure 5', subtitle = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+
+grid.arrange(f4, f5, nrow=1)
 ```
 Normality looks better now. Homoscedasticity looks better as well.
 
+## Check influential points
+
+```{r collinearity}
+ols_vif_tol(m2) 
+```
+No evidence of collinearity
+
+```{r cooks distance}
+# Cook's Distance quantifies influence
+ols_plot_cooksd_bar(m2)
+```
+No points with Cook's D > 0.5
+
+```{r DFFITS}
+ols_plot_dffits(m2)
+```
+
+```{r DFBETAS}
+ols_plot_dfbetas(m2)
+
+dfbetas_plots <- ols_plot_dfbetas(m2, print_plot = F)$plots
+
+grid.arrange(
+  dfbetas_plots[[1]], dfbetas_plots[[2]], dfbetas_plots[[3]],
+  dfbetas_plots[[4]], dfbetas_plots[[5]], dfbetas_plots[[6]], 
+  nrow = 2
+)
+```
+
+
 ```{r}
 ols_plot_resid_stud(m2)
-ols_plot_dffits(m2, print_plot = FALSE)
-#ols_plot_dfbetas(m2, print_plot = FALSE)
 ```
 
 ```{r}
@@ -344,20 +404,54 @@ Observations 3396, 2519, and 2460 seems to be influential points.
 
 ```{r}
 cbind(
-  pred = predict(m2, newdata = nhanes[c(3396, 2519, 2460),]),
-  nhanes[c(3396, 2519, 2460), c(ncol(nhanes), seq_along(names(nhanes)[-ncol(nhanes)]))]
+  pred = predict(m2, newdata = nhanes[c(1013, 2915, 2055, 1945, 3086, 3090, 1941, 2347),]),
+  nhanes[c(1013, 2915, 2055, 1945, 3086, 3090, 1941, 2347), c(ncol(nhanes), seq_along(names(nhanes)[-ncol(nhanes)]))]
+) %>%
+  select(c(SEQN, pred, glucose_log, gender, age, sleep_hrs, diet_health, met_log, met)) %>%
+  mutate(exp_pred = exp(pred), glucose = exp(glucose_log)) %>%
+  select(-c(pred, glucose_log))
+
+```
+
+The data points look reasonable, there is no compelling reason to remove them from the model. These individuals had abnormal average hours of sleep and low activity scores.
+
+Perform sensitivity analysis to see how much parameter estimates change without these points.
+
+```{r sensitivity analysis}
+lm(glucose_log ~ diet_health + sleep_hrs + met_log + age + gender, data = nhanes[-c(1013, 2915, 2055, 1945, 3086, 3090, 1941, 2347), ]) %>%
+  summary()
+
+tab_model(
+  m2, lm(glucose_log ~ diet_health + sleep_hrs + met_log + age + gender, data = nhanes[-c(1013, 2915, 2055, 1945, 3086, 3090, 1941, 2347), ]),
+  dv.labels = c("Original Model", "Influential Points Removed"),
+  pred.labels = c("(Intercept)", "Diet Health Score", "Sleep Hours", "log(MET)", "Age", "Gender"),
+  title = "Supplementary Table 2"
 )
+```
+Estimates and standard errors are very similar, and there doesn't appear to be a data issue. I will leave these observations in the model.
 
+```{r table 3}
+tab_model(
+  m2,
+  pred.labels = c("(Intercept)", "Diet Health Score", "Sleep Hours - Weekdays or Weekends", "log(MET)", "Age", "Gender"),
+  dv.labels = c("log(Fasting Glucose (mg/dL))"),
+  CSS = list(
+    css.depvarhead = 'color: red;',
+    css.centeralign = 'text-align: left;', 
+    css.firsttablecol = 'font-weight: bold;', 
+    css.summary = 'color: blue;'
+  ),
+  title = "Table 3"
+)
 ```
 
-The data points look reasonable, there is no compelling reason to remove them from the model.
+```{r interpreting transformations of y}
+# diet health
+100*(exp(0.0467504) - 1)
 
-```{r}
-tab_model(m2)
-```
+# sleep hours
+100*(exp(-0.0028154) - 1)
 
-```{r}
-sim_slopes(m2, pred = met_log, modx = bmi_cat)
-interact_plot(m2, pred = met_log, modx = bmi_cat)
+100*(exp(-0.0067134) - 1)
 ```
 
